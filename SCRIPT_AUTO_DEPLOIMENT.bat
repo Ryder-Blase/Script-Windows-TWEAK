@@ -172,6 +172,13 @@ if "!buildCheck!"=="" (
     exit /b 1
 )
 
+:: Ask for confirmation before downloading and installing StartAllBack/StartIsBack
+set /p confirmShell=Voulez-vous installer StartAllBack/StartIsBack et remplacer le shell Windows par StartAllBack et supprimer ShellExperience, StartMenuExperience, Search, etc ? (Y/N) : 
+if /i not "%confirmShell%"=="Y" (
+    echo Operation annulee par l'utilisateur.
+    goto :skip_shell_replace
+)
+
 if !buildCheck! GEQ 22000 (
     echo Windows 11 or Server 2022+ detected. Installing StartAllBack...
     powershell -Command "Invoke-WebRequest -Uri 'https://startisback.sfo3.cdn.digitaloceanspaces.com/StartAllBack_3.9.8_setup.exe' -OutFile '%TEMP%\startallback.exe'" >nul 2>&1
@@ -197,6 +204,8 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Us
 taskkill /f /im ShellHost.exe >nul 2>&1
 NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\System32\ShellHost.exe" "C:\Windows\System32\ShellHost.exe.old"
 schtasks /Change /TN "Microsoft\Windows\Server Manager\ServerManager"  /Disable >nul 2>&1
+
+:skip_shell_replace
 
 echo Desactiver la reinstallation de DevHome...
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\DevHomeUpdate" /v workCompleted /t REG_DWORD /d 1 /f >nul 2>&1
