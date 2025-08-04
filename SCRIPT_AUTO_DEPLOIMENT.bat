@@ -190,19 +190,23 @@ if !buildCheck! GEQ 22000 (
 )
 
 echo Desactivation du Shell etc ... (SystemApps)
+:: Detect NSudo.exe in script directory or system PATH
+set "NSUDO_PATH=%~dp0NSudo.exe"
+if not exist "%NSUDO_PATH%" set "NSUDO_PATH=NSudo.exe"
+
 taskkill /f /im ShellExperienceHost.exe >nul 2>&1
-NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy" "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy.old" 
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy" "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy.old"
 taskkill /f /im StartMenuExperienceHost.exe >nul 2>&1
-NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy" "C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy.old" 
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy" "C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy.old"
 taskkill /f /im SearchApp.exe >nul 2>&1 
-NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\Microsoft.Windows.Search_cw5n1h2txyewy" "C:\Windows\SystemApps\Microsoft.Windows.Search_cw5n1h2txyewy.old" 
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\Microsoft.Windows.Search_cw5n1h2txyewy" "C:\Windows\SystemApps\Microsoft.Windows.Search_cw5n1h2txyewy.old"
 taskkill /f /im TextInputHost.exe >nul 2>&1
-NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy" "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy.old" 
-NSudo.exe -U:T -P:E cmd.exe /c reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\Settings\Network" /v ReplaceVan /t REG_DWORD /d 2 /f 
-NSudo.exe -U:T -P:E cmd.exe /c reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\MTCUVC" /v EnableMtcUvc /t REG_DWORD /d 0 /f 
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy" "C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy.old"
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\Settings\Network" /v ReplaceVan /t REG_DWORD /d 2 /f 
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\MTCUVC" /v EnableMtcUvc /t REG_DWORD /d 0 /f 
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v UseWin32TrayClockExperience /t REG_DWORD /d 1 /f >nul 2>&1
 taskkill /f /im ShellHost.exe >nul 2>&1
-NSudo.exe -U:T -P:E cmd.exe /c move "C:\Windows\System32\ShellHost.exe" "C:\Windows\System32\ShellHost.exe.old"
+"%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\System32\ShellHost.exe" "C:\Windows\System32\ShellHost.exe.old"
 schtasks /Change /TN "Microsoft\Windows\Server Manager\ServerManager"  /Disable >nul 2>&1
 
 :skip_shell_replace
