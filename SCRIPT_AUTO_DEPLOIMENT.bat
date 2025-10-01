@@ -181,7 +181,7 @@ if /i not "%confirmShell%"=="Y" (
 
 if !buildCheck! GEQ 22000 (
     echo Windows 11 or Server 2022+ detected. Installing StartAllBack...
-    powershell -Command "Invoke-WebRequest -Uri 'https://startisback.sfo3.cdn.digitaloceanspaces.com/StartAllBack_3.9.8_setup.exe' -OutFile '%TEMP%\startallback.exe'" >nul 2>&1
+    powershell -Command "Invoke-WebRequest -Uri 'https://startisback.sfo3.cdn.digitaloceanspaces.com/StartAllBack_3.9.15_setup.exe' -OutFile '%TEMP%\startallback.exe'" >nul 2>&1
     start /wait "" "%TEMP%\startallback.exe" >nul 2>&1
 ) else (
     echo Windows 10 or lower detected. Installing StartIsBack...
