@@ -107,7 +107,6 @@ powershell -Command "Rename-Computer -NewName "%PCNAME%" -Force" >nul 2>&1
  MicrosoftSolitaireCollection;^
  BingNews;^
  BingWeather;^
- Microsoft.BingSearch;^
  linkedin;^
  Microsoft.PowerAutomateDesktop;^
  HolographicFirstRun;^
