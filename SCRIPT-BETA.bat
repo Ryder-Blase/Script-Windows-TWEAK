@@ -254,6 +254,14 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Teams" /v DisableInstallation /t REG_D
 echo Desactivation de New Outlook...
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Mail" /v PreventRun /t REG_DWORD /d 1 /f >nul 2>&1
 
+echo Desactivation de Cross Device Resume...
+REG ADD "HKLM\SOFTWARE\Microsoft\PolicyManager\default\Connectivity\DisableCrossDeviceResume" /v value /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943" /v EnabledStateOptions /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943" /v EnabledState /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943" /v Variant /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943" /v VariantPayload /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\ControlSet001\Control\FeatureManagement\Overrides\8\1387020943" /v VariantPayloadKind /t REG_DWORD /d 0 /f >nul 2>&1
+
 echo Desactivation des mises a jour automatiques d'Outlook via Windows Update...
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\OutlookUpdate" /v workCompleted /t REG_DWORD /d 1 /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate" /f >nul 2>&1
