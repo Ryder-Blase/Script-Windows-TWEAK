@@ -55,17 +55,7 @@ echo Supression de Microsoft Edge...
    if "%%b"=="MicrosoftEdge" schtasks /delete /tn "%%~a" /f >NUL 2>&1))
 
  where /q "%ProgramFiles(x86)%\Microsoft\Edge\Application:*"
- if %errorlevel% neq 0 goto uninst_wv
  start /w "" "%~dp0\Uninstall_Edge\Setup_Edge.exe" --uninstall --system-level --force-uninstall
-
- :uninst_wv
- echo Supression de WebView
- where /q "%ProgramFiles(x86)%\Microsoft\EdgeWebView\Application:*"
- if %errorlevel% neq 0 goto cleanup_wv_junk
- start /w "" "%~dp0\Uninstall_Edge\Setup_Edge.exe" --uninstall --msedgewebview --system-level --force-uninstall
-
- :cleanup_wv_junk
- for /f "delims=" %%d in ('dir /ad /b /s "%ProgramFiles(x86)%\Microsoft\EdgeWebView" 2^>NUL ^| sort /r') do rd "%%d" 2>NUL
 
  taskkill /im MicrosoftEdgeUpdate.exe /f >NUL 2>&1
  rd /s /q "%ProgramFiles(x86)%\Microsoft\Edge" >NUL 2>&1
@@ -192,6 +182,22 @@ echo Desactivation du Shell etc ... (SystemApps)
 :: Detect NSudo.exe in script directory or system PATH
 set "NSUDO_PATH=%~dp0NSudo.exe"
 if not exist "%NSUDO_PATH%" set "NSUDO_PATH=NSudo.exe"
+
+echo Remove C:\Program Files (x86)\Microsoft\EdgeWebView...
+takeown /f "C:\Program Files (x86)\Microsoft\EdgeWebView" /r >nul 2>&1
+rmdir /q /s "C:\Program Files (x86)\Microsoft\EdgeWebView" >nul 2>&1
+
+ echo Supression de WebView
+ where /q "%ProgramFiles(x86)%\Microsoft\EdgeWebView\Application:*"
+ if %errorlevel% neq 0 goto cleanup_wv_junk
+ start /w "" "%~dp0\Uninstall_Edge\Setup_Edge.exe" --uninstall --msedgewebview --system-level --force-uninstall
+
+ :cleanup_wv_junk
+ for /f "delims=" %%d in ('dir /ad /b /s "%ProgramFiles(x86)%\Microsoft\EdgeWebView" 2^>NUL ^| sort /r') do rd "%%d" 2>NUL
+
+echo Desactivation de Windows Search...
+sc config "WSearch" start=disabled >nul 2>&1
+sc stop "WSearch" >nul 2>&1
 
 taskkill /f /im ShellExperienceHost.exe >nul 2>&1
 "%NSUDO_PATH%" -U:T -P:E cmd.exe /c move "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy" "C:\Windows\SystemApps\ShellExperienceHost_cw5n1h2txyewy.old"
@@ -403,22 +409,21 @@ reg add "HKU\.DEFAULT\Software\Policies\Microsoft\Windows\CloudContent" /v Disab
 reg add "HKCU\SOFTWARE\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsSpotlightOnSettings /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "HKU\.DEFAULT\Software\Policies\Microsoft\Windows\CloudContent" /v DisableWindowsSpotlightOnSettings /t REG_DWORD /d 1 /f >nul 2>&1
 
-REM echo Desactivation de Bing in Start Menu...
-REM reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v ShowRunAsDifferentUserInStart /t REG_DWORD /d 1 /f >nul 2>&1
-REM reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f >nul 2>&1
-REM reg add "HKLM\DefUser\Software\Policies\Microsoft\Windows\Explorer" /v ShowRunAsDifferentUserInStart /t REG_DWORD /d 1 /f >nul 2>&1
-REM reg add "HKLM\DefUser\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f >nul 2>&1
-REM reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v ConnectedSearchUseWebOverMeteredConnections /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v AllowCortana /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f >nul 2>&1
-REM reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v ConnectedSearchUseWeb /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v CortanaConsent /t REG_DWORD /d 0 /f >nul 2>&1 
-REM reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v AllowSearchToUseLocation /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v CortanaConsent /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f >nul 2>&1
-REM reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v AllowSearchToUseLocation /t REG_DWORD /d 0 /f >nul 2>&1
-
+echo Desactivation de Bing in Start Menu...
+reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v ShowRunAsDifferentUserInStart /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKCU\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\DefUser\Software\Policies\Microsoft\Windows\Explorer" /v ShowRunAsDifferentUserInStart /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\DefUser\Software\Policies\Microsoft\Windows\Explorer" /v DisableSearchBoxSuggestions /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v ConnectedSearchUseWebOverMeteredConnections /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v AllowCortana /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v ConnectedSearchUseWeb /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v CortanaConsent /t REG_DWORD /d 0 /f >nul 2>&1 
+reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v AllowSearchToUseLocation /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v CortanaConsent /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v BingSearchEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\DefUser\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v AllowSearchToUseLocation /t REG_DWORD /d 0 /f >nul 2>&1
 
 echo Deleting Application Compatibility Appraiser...
 reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{0600DD45-FAF2-4131-A006-0B17509B9F78}" /f >nul 2>&1
@@ -511,10 +516,6 @@ reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\ker
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v MinimumDpcRate /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v DpcWatchdogPeriod /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v ThreadDpcEnable /t REG_DWORD /d 0 /f >nul 2>&1
-
-REM echo Desactivation de Windows Search...
-REM sc config "WSearch" start=disabled >nul 2>&1
-REM sc stop "WSearch" >nul 2>&1
 
 REM echo Set Print Spooler to Manual...
 REM sc config "Spooler" start=demand >nul 2>&1
@@ -699,9 +700,6 @@ echo Remove C:\Program Files (x86)\Microsoft\EdgeUpdate...
 takeown /f "C:\Program Files (x86)\Microsoft\EdgeUpdate" /r >nul 2>&1
 rmdir /q /s "C:\Program Files (x86)\Microsoft\EdgeUpdate" >nul 2>&1
 
-echo Remove C:\Program Files (x86)\Microsoft\EdgeWebView...
-takeown /f "C:\Program Files (x86)\Microsoft\EdgeWebView" /r >nul 2>&1
-rmdir /q /s "C:\Program Files (x86)\Microsoft\EdgeWebView" >nul 2>&1
 
 echo Supression du dossier temporaire C:\Perflogs...
 rmdir /q /s "C:\Perflogs" >nul 2>&1
