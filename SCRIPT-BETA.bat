@@ -117,6 +117,7 @@ powershell -Command "Rename-Computer -NewName "%PCNAME%" -Force" >nul 2>&1
  Microsoft.Todos;^
  Microsoft.Wallet;^
  Microsoft.Windows.CrossDevice;^
+ Microsoft.ApplicationCompatibilityEnhancements;^
  Copilot;^
  OneConnect;^
  Clipchamp;^
