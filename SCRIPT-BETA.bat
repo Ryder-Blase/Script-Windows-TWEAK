@@ -539,14 +539,18 @@ sc config "RetailDemo" start=disabled >nul 2>&1
 sc config "wisvc" start=disabled >nul 2>&1
 sc config "PcaSvc" start=disabled >nul 2>&1
 sc config "TabletInputService" start=disabled >nul 2>&1
-sc config "SDRSVC" start=disabled >nul 2>&1
 sc config "SyncCenter" start=disabled >nul 2>&1
 sc config "Fax" start=disabled >nul 2>&1
-sc stop wisvc >nul 2>&1
+sc config "MapsBroker" start=disabled >nul 2>&1
+sc config "RemoteRegistry" start=disabled >nul 2>&1
+sc config "WbioSrvc" start=disabled >nul 2>&1
 sc stop PcaSvc >nul 2>&1
-sc stop SDRSVC >nul 2>&1
+sc stop wisvc >nul 2>&1
 sc stop SyncCenter >nul 2>&1
 sc stop Fax >nul 2>&1
+sc stop MapsBroker >nul 2>&1
+sc stop RemoteRegistry >nul 2>&1
+sc stop WbioSrvc >nul 2>&1
 
 echo Application de SvcHostSplit pour reduire le nombre de SvcHost...
 for /f "tokens=*" %%p in ('powershell -NoProfile -Command "& {(Get-CimInstance -ClassName Win32_OperatingSystem).TotalVisibleMemorySize}"') do (
@@ -568,6 +572,17 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "ThreadSchedu
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "AdjustDpcThreshold" /t REG_DWORD /d "800" /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "DeepIoCoalescingEnabled" /t REG_DWORD /d "1" /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "IdealDpcRate" /t REG_DWORD /d "800" /f >nul 2>&1
+
+echo Reduction des interruptions pour sauver CPU cycles...
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v DistributeTimers /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v GlobalTimerResolutionRequests /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v MaxDynamicTickDuration /t REG_DWORD /d 10 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\kernel" /v MinimumDpcRate /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Desactivation des animations inutiles qui consomment CPU...
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" /v VisualFXSetting /t REG_DWORD /d 3 /f >nul 2>&1
+reg add "HKCU\Control Panel\Desktop\WindowMetrics" /v MinAnimate /t REG_SZ /d 0 /f >nul 2>&1
+SystemPropertiesPerformance.exe /pagefile >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\PriorityControl" /v "SchedulerAssistThreadFlagOverride" /t REG_DWORD /d "1" /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v "LowLatencyMode" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Executive" /v "EnableGroupAwareScheduling" /t REG_DWORD /d 1 /f >nul 2>&1
@@ -714,12 +729,6 @@ for /f "tokens=*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Services\Tcp
     reg add "%%a" /v DisableTaskOffload /t REG_DWORD /d 0 /f >nul 2>&1
 )
 
-echo Configuration DNS rapide (Cloudflare 1.1.1.1 + Google 1.0.0.1)...
-for /f "tokens=*" %%a in ('netsh interface show interface ^| findstr "Connected"') do (
-    netsh interface ip set dns name="%%a" static 1.1.1.1 primary >nul 2>&1
-    netsh interface ip add dns name="%%a" 1.0.0.1 index=2 >nul 2>&1
-)
-
 echo SerializeTimerExpiration Tweaks
 REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v SerializeTimerExpiration /t REG_DWORD /d 1 /f >nul 2>&1
 
@@ -736,6 +745,15 @@ reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management
 
 echo Activation de LargeSystemCache... 
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v LargeSystemCache /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Modification des tailles de pool memoire...
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v NonPagedPoolSize /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v PagedPoolSize /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v SecondLevelDataCache /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v SessionPoolSize /t REG_DWORD /d 4 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v SessionViewSize /t REG_DWORD /d 48 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v SystemPages /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v ClearPageFileAtShutdown /t REG_DWORD /d 0 /f >nul 2>&1
 
 echo Desactivation des Audio Enhancements systeme...
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" /v DisableProtectedAudioDG /t REG_DWORD /d 1 /f >nul 2>&1
@@ -783,6 +801,7 @@ fsutil behavior set disabledeletenotify 0 >NUL 2>nul
 fsutil behavior set encryptpagingfile 0 >NUL 2>nul
 fsutil behavior set disable8dot3 1 >NUL 2>nul
 call :ControlSet "Control\FileSystem" "NtfsDisable8dot3NameCreation" "1"
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v ClearPageFileAtShutdown /t REG_DWORD /d 0 /f >nul 2>&1
 
 fsutil behavior set disablecompression 1 >nul
 
@@ -806,7 +825,7 @@ rem Parameters: %1 - registry path, %2 - key name, %3 - key value
 reg add "HKLM\SYSTEM\CurrentControlSet\%1" /v %2 /t REG_DWORD /d %3 /f 
 
 
-echo Reinitilisation de Hibernation...
+echo Desactivation de Hibernate pour liberer de la place (hiberfil.sys)...
 powercfg -h off >nul 2>&1
 powercfg -h on >nul 2>&1
 
@@ -845,6 +864,7 @@ dism /Online /Set-ReservedStorageState /State:Disabled >nul 2>&1
 
 echo Nettoyage de WinSxS...
 Dism.exe /online /Cleanup-Image /StartComponentCleanup /ResetBase >nul 2>&1
+Dism.exe /online /Cleanup-Image /SPSuperseded >nul 2>&1
 
 echo Nettoyage...
 cleanmgr /sagerun:50 >nul 2>&1
