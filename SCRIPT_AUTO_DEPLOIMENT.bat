@@ -88,6 +88,9 @@ powershell -Command "Rename-Computer -NewName "%PCNAME%" -Force" >nul 2>&1
  setlocal enabledelayedexpansion
  set apps=^
  3DBuilder;^
+ AppUp.IntelManagementandSecurityStatus;^
+ DolbyLaboratories.DolbyAccess;^
+ DolbyLaboratories.DolbyDigitalPlusDecoderOEM;^
  OneNote;^
  SkypeApp;^
  People;^
@@ -108,6 +111,12 @@ powershell -Command "Rename-Computer -NewName "%PCNAME%" -Force" >nul 2>&1
  Microsoft.Windows.DevHome;^
  Microsoft.MicrosoftOfficeHub;^
  Microsoft.Copilot;^
+ Microsoft.Windows.Copilot;^
+ Microsoft.Windows.Ai.Copilot;^
+ Microsoft.Windows.Recall;^
+ Microsoft.Todos;^
+ Microsoft.Wallet;^
+ Microsoft.Windows.CrossDevice;^
  Copilot;^
  OneConnect;^
  Clipchamp;^
@@ -220,6 +229,32 @@ echo Desactiver la reinstallation de DevHome...
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\DevHomeUpdate" /v workCompleted /t REG_DWORD /d 1 /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\DevHomeUpdate" /f >nul 2>&1
 
+echo Desactivation de BitLocker Device Encryption...
+reg add "HKLM\SYSTEM\ControlSet001\Control\BitLocker" /v PreventDeviceEncryption /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Desactivation du Chat Windows...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Chat" /v ChatIcon /t REG_DWORD /d 3 /f >nul 2>&1
+
+echo Desactivation de Copilot...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot" /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Edge" /v HubsSidebarEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+
+echo Desactivation de l'installation automatique de Teams...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Teams" /v DisableInstallation /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Desactivation de New Outlook...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Mail" /v PreventRun /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Desactivation des mises a jour automatiques d'Outlook via Windows Update...
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Orchestrator\UScheduler\OutlookUpdate" /v workCompleted /t REG_DWORD /d 1 /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Microsoft\WindowsUpdate\Orchestrator\UScheduler_Oobe\OutlookUpdate" /f >nul 2>&1
+
+echo Configuration des politiques MRT (Malicious Software Removal Tool)...
+reg add "HKLM\SOFTWARE\Policies\Microsoft\MRT" /v DontOfferThroughWUAU /t REG_DWORD /d 1 /f >nul 2>&1
+
+echo Desactivation du Reserved Storage Manager...
+reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\ReserveManager" /v ShippedWithReserves /t REG_DWORD /d 0 /f >nul 2>&1
+
 echo Suppression de OneDrive...
 C:\Windows\System32\OneDriveSetup.exe /uninstall >nul 2>&1
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\OneDrive" /v DisableFileSyncNGSC /t REG_DWORD /d 1 /f >nul 2>&1
@@ -286,6 +321,9 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 echo Desactivation des applications OEM preinstallees...
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v OemPreInstalledAppsEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 
+echo Desactivation des applications preinstallees...
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v PreInstalledAppsEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+
 echo Desactivation de l'activation precedente des applications preinstallees...
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v PreInstalledAppsEverEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 
@@ -311,6 +349,7 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" 
 echo Application des memes reglages au profil par defaut...
 reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v FeatureManagementEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v OemPreInstalledAppsEnabled /t REG_DWORD /d 0 /f >nul 2>&1
+reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v PreInstalledAppsEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v PreInstalledAppsEverEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SilentInstalledAppsEnabled /t REG_DWORD /d 0 /f >nul 2>&1
 reg add "HKLM\DefUser\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" /v SoftLandingEnabled /t REG_DWORD /d 0 /f >nul 2>&1
@@ -396,6 +435,7 @@ sc config "DiagTrack" start=disabled >nul 2>&1
 sc stop "DiagTrack" >nul 2>&1
 sc stop dmwappushservice >nul 2>&1
 sc config dmwappushservice start=disabled >nul 2>&1
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\dmwappushservice" /v Start /t REG_DWORD /d 4 /f >nul 2>&1
 echo "" > %ProgramData%\Microsoft\Diagnosis\ETLLogs\AutoLogger\AutoLogger-Diagtrack-Listener.etl >nul 2>&1
 
 
@@ -432,6 +472,12 @@ echo Deleting Customer Experience Improvement Program...
 reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{4738DE7A-BCC1-4E2D-B1B0-CADB044BFA81}" /f >nul 2>&1
 reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{6FAC31FA-4A85-4E64-BFD5-2154FF4594B3}" /f >nul 2>&1
 reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks\{FC931F16-B50A-472E-B061-B6F79A71EF59}" /f >nul 2>&1
+
+echo Desactivation des taches planifiees de telemetrie...
+schtasks /Change /TN "\Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser" /Disable >nul 2>&1
+schtasks /Change /TN "\Microsoft\Windows\Application Experience\ProgramDataUpdater" /Disable >nul 2>&1
+schtasks /Change /TN "\Microsoft\Windows\Chkdsk\Proxy" /Disable >nul 2>&1
+schtasks /Change /TN "\Microsoft\Windows\Windows Error Reporting\QueueReporting" /Disable >nul 2>&1
 
 echo Desactivation de .NET Optimization Service (NGEN)...
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\CI\NGEN" /v "C:\Windows\Microsoft.NET\Framework\v4.0.30319\mscorsvw.exe" /t REG_DWORD /d 0 /f >nul 2>&1
@@ -748,7 +794,3 @@ reg unload "HKLM\DefUser" >nul 2>&1
 echo Redemarrer le PC avec shutdown /t 0 /r
 pause
 shutdown /t 0 /r >nul 2>&1
-
-
-
-
