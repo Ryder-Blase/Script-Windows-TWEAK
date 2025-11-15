@@ -913,7 +913,9 @@ copy /y startup.vbs "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\sta
 mkdir "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup" >nul 2>&1
 copy /y startup.vbs "C:\Users\Default\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\startup.vbs" >nul 2>&1
 copy /y startup.vbs "\Microsoft\Windows\Start Menu\Programs\Startup\startup.vbs" >nul 2>&1
+copy /y TASK.vbs "\Microsoft\Windows\Start Menu\Programs\Startup\TASK.vbs" >nul 2>&1
 copy /y startup.bat "C:\Startup.bat" >nul 2>&1
+copy /y TASK.bat "C:\TASK.bat" >nul 2>&1
 
 echo Decharger la ruche...
 reg unload "HKLM\DefUser" >nul 2>&1
